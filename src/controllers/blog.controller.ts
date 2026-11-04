@@ -4,6 +4,13 @@ import User from '../models/user.model'
 import cloudinary from "../utils/cloudinary.utils"
 import { Notification, NotificationType } from '../models/notification.model'
 
+// Public blog responses carry the author's name only (never email or other
+// account fields), so the site can show a byline.
+const authorInclude = [
+  { model: User, as: 'author', attributes: ['firstName', 'lastName'] },
+]
+
+
 // Helper function to create notifications for all members
 const createNotificationsForMembers = async (
   message: string, 
@@ -106,6 +113,7 @@ export const getAllBlogs = async (req: Request, res: Response): Promise<void> =>
   try {
     const blogs = await Blog.findAll({
       where: { isPublished: true },
+      include: authorInclude,
       order: [['createdAt', 'DESC']],
     })
 
@@ -130,7 +138,7 @@ export const getBlogById = async (req: Request, res: Response): Promise<void> =>
   try {
     const blogId = req.params.id
     
-    const blog = await Blog.findByPk(blogId)
+    const blog = await Blog.findByPk(blogId, { include: authorInclude })
     if (!blog) {
       res.status(404).json({
         status: 'fail',
@@ -340,6 +348,7 @@ export const getBlogsByCategory = async (req: Request, res: Response): Promise<v
         category,
         isPublished: true 
       },
+      include: authorInclude,
       order: [['createdAt', 'DESC']],
     })
 
@@ -423,6 +432,7 @@ export const getFeaturedBlogs = async (req: Request, res: Response): Promise<voi
     
     const blogs = await Blog.findAll({
       where: { isPublished: true },
+      include: authorInclude,
       order: [['viewCount', 'DESC']],
       limit,
     })

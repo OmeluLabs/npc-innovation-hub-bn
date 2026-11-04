@@ -1,8 +1,32 @@
 import { Request, Response } from 'express';
-import Project from '../models/project.model';
+import Project, { PROJECT_STATUSES, ProjectStatus } from '../models/project.model';
 import User from '../models/user.model';
 import cloudinary from "../utils/cloudinary.utils";
 import sequelize from 'sequelize';
+
+// techStack arrives from multipart forms as a comma-separated string (or a
+// JSON array string / real array from JSON clients). Normalised to a trimmed,
+// de-duplicated list of at most 12 short tags.
+const parseTechStack = (raw: unknown): string[] => {
+  let items: unknown[] = [];
+  if (Array.isArray(raw)) {
+    items = raw;
+  } else if (typeof raw === 'string' && raw.trim() !== '') {
+    try {
+      const parsed = JSON.parse(raw);
+      items = Array.isArray(parsed) ? parsed : raw.split(',');
+    } catch {
+      items = raw.split(',');
+    }
+  }
+  const tags = items
+    .map((item) => String(item).trim())
+    .filter((item) => item.length > 0 && item.length <= 40);
+  return Array.from(new Set(tags)).slice(0, 12);
+};
+
+const parseProjectStatus = (raw: unknown): ProjectStatus | undefined =>
+  PROJECT_STATUSES.find((status) => status === raw);
 
 // Get all projects (public)
 export const getAllProjects = async (req: Request, res: Response): Promise<void> => {
@@ -77,6 +101,8 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
     const currentUser = req.user as { id: string; firstName: string; lastName: string; role: string };
     
     const { title, description, link, demo } = req.body;
+    const techStack = parseTechStack(req.body.techStack);
+    const status = parseProjectStatus(req.body.status) ?? 'In Progress';
     
     if (!title || !description) {
       res.status(400).json({
@@ -126,6 +152,8 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
       image: imageUrl,
       link: link || '',
       demo: demo || '',
+      techStack,
+      status,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -194,6 +222,11 @@ export const updateProject = async (req: Request, res: Response): Promise<void> 
     if ('description' in req.body) updateData.description = req.body.description;
     if ('link' in req.body) updateData.link = req.body.link;
     if ('demo' in req.body) updateData.demo = req.body.demo;
+    if ('techStack' in req.body) updateData.techStack = parseTechStack(req.body.techStack);
+    if ('status' in req.body) {
+      const status = parseProjectStatus(req.body.status);
+      if (status) updateData.status = status;
+    }
     
     // Handle project image upload if provided
     if (req.file) {

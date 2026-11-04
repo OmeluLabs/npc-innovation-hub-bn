@@ -2,6 +2,9 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import User from './user.model';
 
+export const PROJECT_STATUSES = ['Planned', 'In Progress', 'Completed'] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
 // Define project attributes
 interface ProjectAttributes {
   id: string;
@@ -14,11 +17,13 @@ interface ProjectAttributes {
   image: string;
   link: string;
   demo: string;
+  techStack: string[];
+  status: ProjectStatus;
   createdAt: Date;
   updatedAt: Date;
 }
 
-type ProjectCreationAttributes = Optional<ProjectAttributes, 'id' | 'ownerRole' | 'ownerAvatar' | 'image'>;
+type ProjectCreationAttributes = Optional<ProjectAttributes, 'id' | 'ownerRole' | 'ownerAvatar' | 'image' | 'techStack' | 'status'>;
 
 class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implements ProjectAttributes {
   declare id: string;
@@ -31,6 +36,8 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implem
   declare image: string;
   declare link: string;
   declare demo: string;
+  declare techStack: string[];
+  declare status: ProjectStatus;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -82,6 +89,17 @@ Project.init(
     demo: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    techStack: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'In Progress',
+      validate: { isIn: [[...PROJECT_STATUSES]] },
     },
     createdAt: {
       allowNull: false,

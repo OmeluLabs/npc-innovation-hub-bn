@@ -6,7 +6,6 @@ import { verifyTokenMiddleware } from '../middlewares/verifyToken.middleware';
 import upload from '../utils/multerConfig';
 import {
   updateRole,
-  userSignup,
   userLogin,
   userLogout,
   changeAccountStatus,
@@ -20,7 +19,6 @@ import {
   updateProfile,
 } from '../controllers/user.controller';
 import {
-  validateUser,
   validateUserLogin,
   validateUserUpdatePassword,
 } from '../validations/user.validation';
@@ -29,12 +27,20 @@ import { loginWithGoogleToken } from '../controllers/user.controller';
 import {
   authGuessLimiter,
   emailSendLimiter,
-  signupLimiter,
 } from '../middlewares/rateLimit.middleware';
 
 const userRoutes = express.Router();
 
-userRoutes.post('/signup', signupLimiter, validateUser, userSignup);
+// Accounts are invitation-only: people apply (POST /api/applications) and an
+// Admin's acceptance creates the account and emails the credentials (see
+// admin/application.controller.ts). Public self-registration is closed.
+userRoutes.post('/signup', (_req: Request, res: Response) => {
+  res.status(403).json({
+    status: 'fail',
+    message:
+      'Public sign-up is closed. Submit an application to join; if accepted, your account details are sent to you by email.',
+  });
+});
 
 // restrictTo('Admin') added declaratively here - both were previously
 // Admin-gated only inside their own controllers (updateRole/

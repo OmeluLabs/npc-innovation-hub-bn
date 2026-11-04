@@ -57,6 +57,29 @@ export const validateAlumniStatusUpdate = (req: Request, res: Response, next: Ne
   next()
 }
 
+const leadershipUpdateSchema = Joi.object({
+  leadershipTier: Joi.string().valid('Co-Founder', 'Leader', 'Member').required().messages({
+    'any.only': 'leadershipTier must be Co-Founder, Leader or Member',
+    'any.required': 'leadershipTier is required',
+  }),
+  leadershipTitle: Joi.string().trim().max(80).allow('', null).optional(),
+  displayOrder: Joi.number().integer().min(0).max(9999).optional(),
+})
+
+export const validateLeadershipUpdate = (req: Request, res: Response, next: NextFunction): void => {
+  const { error, value } = leadershipUpdateSchema.validate(req.body || {}, { abortEarly: false })
+  if (error) {
+    res.status(400).json({
+      status: 'fail',
+      message: error.details.map((detail) => detail.message).join(', '),
+    })
+    return
+  }
+
+  req.body = value
+  next()
+}
+
 const currentYear = new Date().getFullYear()
 
 const educationUpdateBodySchema = Joi.object({

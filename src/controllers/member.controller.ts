@@ -163,7 +163,10 @@ export const getAllMembers = async (req: Request, res: Response): Promise<void> 
     // frontend at all; the real data was simply never being sent.
     const memberRows = await Member.findAll({
       where: { userId: users.map((user) => user.id) },
-      attributes: ['id', 'userId', 'name', 'role', 'imageUrl', 'skills', 'tagline', 'availability']
+      attributes: [
+        'id', 'userId', 'name', 'role', 'imageUrl', 'skills', 'tagline', 'availability',
+        'contacts', 'leadershipTier', 'leadershipTitle', 'displayOrder',
+      ]
     });
     const memberByUserId = new Map(memberRows.map((member) => [member.userId, member]));
 
@@ -182,6 +185,19 @@ export const getAllMembers = async (req: Request, res: Response): Promise<void> 
       return Boolean(member && member.skills && member.skills.length > 0);
     });
 
+    // Co-Founders first, then Leaders, then Members; within a tier by the
+    // admin-set displayOrder, then by name (users are already name-ordered,
+    // and Array.sort is stable).
+    const tierRank = (userId: string): number => {
+      const tier = memberByUserId.get(userId)?.leadershipTier;
+      return tier === 'Co-Founder' ? 0 : tier === 'Leader' ? 1 : 2;
+    };
+    eligibleUsers.sort(
+      (a, b) =>
+        tierRank(a.id) - tierRank(b.id) ||
+        (memberByUserId.get(a.id)?.displayOrder ?? 0) - (memberByUserId.get(b.id)?.displayOrder ?? 0),
+    );
+
     const count = eligibleUsers.length;
     const totalPages = Math.ceil(count / limit) || 1;
     const pageUsers = eligibleUsers.slice(offset, offset + limit);
@@ -198,7 +214,15 @@ export const getAllMembers = async (req: Request, res: Response): Promise<void> 
           imageUrl: member.imageUrl,
           techStack: member.skills,
           tagline: member.tagline ?? '',
-          available: member.availability
+          available: member.availability,
+          leadershipTier: member.leadershipTier ?? 'Member',
+          leadershipTitle: member.leadershipTitle ?? null,
+          displayOrder: member.displayOrder ?? 0,
+          contacts: {
+            linkedin: member.contacts?.linkedin ?? '',
+            github: member.contacts?.github ?? '',
+            twitter: member.contacts?.twitter ?? '',
+          },
         };
       } else {
         return {
@@ -209,7 +233,11 @@ export const getAllMembers = async (req: Request, res: Response): Promise<void> 
           imageUrl: '/members-images/member-demo.jpg',
           techStack: [],
           tagline: '',
-          available: undefined
+          available: undefined,
+          leadershipTier: 'Member',
+          leadershipTitle: null,
+          displayOrder: 0,
+          contacts: { linkedin: '', github: '', twitter: '' },
         };
       }
     });

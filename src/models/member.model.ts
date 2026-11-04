@@ -37,6 +37,11 @@ interface Language {
   level: 'Native' | 'Fluent' | 'Intermediate' | 'Basic';
 }
 
+// Where a member sits on the public Members page. Set by an admin; a member
+// with no explicit tier is a plain 'Member'.
+export const LEADERSHIP_TIERS = ['Co-Founder', 'Leader', 'Member'] as const;
+export type LeadershipTier = (typeof LEADERSHIP_TIERS)[number];
+
 // Define member attributes
 interface MemberAttributes {
   id: string;
@@ -57,13 +62,16 @@ interface MemberAttributes {
   availability: boolean;
   isAlumni: boolean;
   alumniSince: Date | null;
+  leadershipTier: LeadershipTier;
+  leadershipTitle: string | null;
+  displayOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 type MemberCreationAttributes = Optional<
   MemberAttributes,
-  'id' | 'education' | 'contacts' | 'skillDetails' | 'bio' | 'languages' | 'cvUrl' | 'resumeUrl' | 'tagline' | 'hashtags' | 'availability' | 'isAlumni' | 'alumniSince'
+  'id' | 'education' | 'contacts' | 'skillDetails' | 'bio' | 'languages' | 'cvUrl' | 'resumeUrl' | 'tagline' | 'hashtags' | 'availability' | 'isAlumni' | 'alumniSince' | 'leadershipTier' | 'leadershipTitle' | 'displayOrder'
 >;
 
 class Member extends Model<MemberAttributes, MemberCreationAttributes> implements MemberAttributes {
@@ -85,6 +93,9 @@ class Member extends Model<MemberAttributes, MemberCreationAttributes> implement
   declare availability: boolean;
   declare isAlumni: boolean;
   declare alumniSince: Date | null;
+  declare leadershipTier: LeadershipTier;
+  declare leadershipTitle: string | null;
+  declare displayOrder: number;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -176,6 +187,23 @@ Member.init(
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,
+    },
+    leadershipTier: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'Member',
+      validate: { isIn: [[...LEADERSHIP_TIERS]] },
+    },
+    leadershipTitle: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
+      defaultValue: null,
+    },
+    // Lower numbers appear first within a tier.
+    displayOrder: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     createdAt: {
       allowNull: false,

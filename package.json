@@ -17,6 +17,7 @@
     "db:sync-hub-video": "ts-node src/scripts/sync-hub-video-model.ts",
     "db:sync-member-alumni": "ts-node src/scripts/sync-member-alumni.ts",
     "db:sync-member-leadership": "ts-node src/scripts/sync-member-leadership.ts",
+    "db:sync-project": "ts-node src/scripts/sync-project-model.ts",
     "db:sync-alumnus": "ts-node src/scripts/sync-alumnus-model.ts",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

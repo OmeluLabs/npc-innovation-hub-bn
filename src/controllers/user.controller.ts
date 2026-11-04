@@ -551,22 +551,15 @@ export const loginWithGoogleToken = async (req: Request, res: Response): Promise
       return;
     }
 
-    // Find or create user in your DB
-    let user = await UserService.getUserByEmail(payload.email);
+    // Google sign-in only works for accounts that already exist (created
+    // when an application was accepted) - it never creates one.
+    const user = await UserService.getUserByEmail(payload.email);
     if (!user) {
-      user = await UserService.register({
-        firstName: payload.given_name || 'Google',
-        lastName: payload.family_name || 'User',
-        email: payload.email,
-        password: '', // No password for Google-only users
-        gender: 'Not Specified',
-        phone: '',
-        role: 'Member',
-        updatedAt: new Date(),
-        createdAt: new Date(),
-        verified: true,   // Consider Google-verified emails as verified
-        isActive: true,   // Or set your default
+      res.status(403).json({
+        message:
+          'No account exists for this Google email. Accounts are created for accepted applicants - submit an application to join.',
       });
+      return;
     } else {
       // Optionally update user info from Google
       user.firstName = payload.given_name || user.firstName;

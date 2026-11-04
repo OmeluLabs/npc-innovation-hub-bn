@@ -1,7 +1,7 @@
 import express from 'express';
 import { protectRoute, restrictTo } from '../../middlewares/auth.middleware';
-import { updateMemberAlumniStatus } from '../../controllers/admin/member.controller';
-import { validateAlumniStatusUpdate } from '../../validations/member.validation';
+import { updateMemberAlumniStatus, updateMemberLeadership } from '../../controllers/admin/member.controller';
+import { validateAlumniStatusUpdate, validateLeadershipUpdate } from '../../validations/member.validation';
 
 const router = express.Router();
 
@@ -9,5 +9,7 @@ const router = express.Router();
 router.use(protectRoute, restrictTo('Admin'));
 
 router.patch('/:id/alumni-status', validateAlumniStatusUpdate, updateMemberAlumniStatus);
+
+router.patch('/:id/leadership', validateLeadershipUpdate, updateMemberLeadership);
 
 export default router;

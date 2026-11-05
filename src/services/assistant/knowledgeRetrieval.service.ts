@@ -23,7 +23,6 @@ import Event from '../../models/event.model';
 import Blog from '../../models/blog.model';
 import HeroFeaturedMember from '../../models/heroFeaturedMember.model';
 import Member from '../../models/member.model';
-import Alumnus from '../../models/alumnus.model';
 import User from '../../models/user.model';
 import Resource from '../../models/resource.model';
 import Task from '../../models/task.model';
@@ -124,19 +123,6 @@ async function getHeroMembersContext(): Promise<string | null> {
   return 'Featured NPC members:\n' + lines.join('\n');
 }
 
-async function getAlumniContext(): Promise<string | null> {
-  const [memberAlumni, standaloneAlumni] = await Promise.all([
-    Member.findAll({ where: { isAlumni: true }, attributes: ['name', 'role'], limit: RESULT_CAP }),
-    Alumnus.findAll({ attributes: ['fullName', 'role'], limit: RESULT_CAP }),
-  ]);
-  const lines = [
-    ...memberAlumni.map((m) => `- ${m.get('name')} (${m.get('role')})`),
-    ...standaloneAlumni.map((a) => `- ${a.get('fullName')} (${a.get('role')})`),
-  ].slice(0, RESULT_CAP);
-  if (lines.length === 0) return null;
-  return 'NPC alumni:\n' + lines.join('\n');
-}
-
 // Resources require authentication on every real route with no
 // exceptions (confirmed - resource.routes.ts applies protectRoute to
 // every GET) - so this is only ever called when `user` is defined.
@@ -194,7 +180,6 @@ export type AssistantIntent =
   | 'events'
   | 'blogs'
   | 'members'
-  | 'alumni'
   | 'resources'
   | 'own_data'
   | 'general';
@@ -212,7 +197,6 @@ const INTENT_PATTERNS: Array<{ intent: AssistantIntent; pattern: RegExp }> = [
   { intent: 'events', pattern: /\bevents?\b|\bibirori\b|\bitsibi\b/i },
   { intent: 'blogs', pattern: /\bblogs?\b|\barticles?\b/i },
   { intent: 'members', pattern: /\bmembers?\b|\bumunyamuryango\b/i },
-  { intent: 'alumni', pattern: /\balumni\b/i },
   { intent: 'resources', pattern: /\bresources?\b/i },
   { intent: 'about', pattern: /\bcontact\b|\btelefoni\b|\bimeri\b|\bemail\b|\bphone\b/i },
 ];
@@ -245,7 +229,6 @@ export async function retrieveKnowledge(
   if (intents.includes('events')) fetchers.push(getEventsContext);
   if (intents.includes('blogs')) fetchers.push(getBlogsContext);
   if (intents.includes('members')) fetchers.push(getMembersContext);
-  if (intents.includes('alumni')) fetchers.push(getAlumniContext);
 
   // Resources: only ever fetched when a real authenticated user is
   // present - this is the structural RBAC gate, independent of whatever

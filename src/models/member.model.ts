@@ -60,8 +60,6 @@ interface MemberAttributes {
   tagline?: string | null;
   hashtags?: string[];
   availability: boolean;
-  isAlumni: boolean;
-  alumniSince: Date | null;
   leadershipTier: LeadershipTier;
   leadershipTitle: string | null;
   displayOrder: number;
@@ -71,7 +69,7 @@ interface MemberAttributes {
 
 type MemberCreationAttributes = Optional<
   MemberAttributes,
-  'id' | 'education' | 'contacts' | 'skillDetails' | 'bio' | 'languages' | 'cvUrl' | 'resumeUrl' | 'tagline' | 'hashtags' | 'availability' | 'isAlumni' | 'alumniSince' | 'leadershipTier' | 'leadershipTitle' | 'displayOrder'
+  'id' | 'education' | 'contacts' | 'skillDetails' | 'bio' | 'languages' | 'cvUrl' | 'resumeUrl' | 'tagline' | 'hashtags' | 'availability' | 'leadershipTier' | 'leadershipTitle' | 'displayOrder'
 >;
 
 class Member extends Model<MemberAttributes, MemberCreationAttributes> implements MemberAttributes {
@@ -91,8 +89,6 @@ class Member extends Model<MemberAttributes, MemberCreationAttributes> implement
   declare tagline: string | null;
   declare hashtags: string[];
   declare availability: boolean;
-  declare isAlumni: boolean;
-  declare alumniSince: Date | null;
   declare leadershipTier: LeadershipTier;
   declare leadershipTitle: string | null;
   declare displayOrder: number;
@@ -177,16 +173,6 @@ Member.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
-    },
-    isAlumni: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    alumniSince: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: null,
     },
     leadershipTier: {
       type: DataTypes.STRING,

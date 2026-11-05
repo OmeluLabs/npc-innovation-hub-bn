@@ -29,8 +29,6 @@ import hubVideoRoutes from './routes/hubVideo.routes';
 import adminHeroMediaRoutes from './routes/admin/heroMedia.routes';
 import heroMediaRoutes from './routes/heroMedia.routes';
 import adminMemberRoutes from './routes/admin/member.routes';
-import adminAlumnusRoutes from './routes/admin/alumnus.routes';
-import alumniRoutes from './routes/alumni.routes';
 import taskRoutes from './routes/task.routes';
 
 // Load environment variables
@@ -128,7 +126,6 @@ app.use('/api/hero-members', heroMembersRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/hub-video', hubVideoRoutes);
 app.use('/api/hero-media', heroMediaRoutes);
-app.use('/api/alumni', alumniRoutes);
 
 // Admin routes - already protected by middleware in the router
 app.use('/api/admin/hire-inquiries', adminHireRoutes);
@@ -137,7 +134,6 @@ app.use('/api/admin/applications', adminApplicationRoutes);
 app.use('/api/admin/hub-video', adminHubVideoRoutes);
 app.use('/api/admin/hero-media', adminHeroMediaRoutes);
 app.use('/api/admin/members', adminMemberRoutes);
-app.use('/api/admin/alumni', adminAlumnusRoutes);
 // Mounted broadly at /api/admin since this router covers two related
 // admin-only concerns (the member picker and hero-member CRUD) under their
 // own more specific sub-paths (/members/picker, /hero-members*) - it only

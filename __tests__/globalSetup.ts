@@ -17,7 +17,6 @@
 // test bug. Importing every model explicitly here removes that
 // order-of-discovery dependency entirely.
 import sequelize from '../src/config/database';
-import '../src/models/alumnus.model';
 import '../src/models/application.model';
 import '../src/models/attendance.model';
 import '../src/models/blog.model';

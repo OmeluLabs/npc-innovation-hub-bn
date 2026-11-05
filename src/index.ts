@@ -2,6 +2,7 @@ import { app } from './server';
 import http from 'http';
 import config from './config/app.config';
 import sequelize from './config/database';  // Import your sequelize instance
+import { ensureSchema } from './config/ensureSchema';
 import { initSocket } from './socketio';
 
 // Note: Swagger UI is already mounted at /api-docs inside server.ts, before
@@ -30,6 +31,9 @@ const startServer = async () => {
     // Sync all models
     await sequelize.sync({ force: false });
     console.log('All database tables created successfully.');
+
+    // Add columns introduced after a table's first creation (sync() never does).
+    await ensureSchema();
     
     // Start server after database is ready
     server.listen(PORT, '0.0.0.0', () => {

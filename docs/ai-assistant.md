@@ -107,7 +107,7 @@ message that never confirms or denies that a specific secret/prompt exists.
 ## Data classification
 
 - **Public** (no gate): org facts, projects, upcoming events, published
-  blogs, hero members, alumni.
+  blogs, hero members.
 - **Authenticated-only**: learning resources (matches the real
   `resource.routes.ts`, which requires auth on every route).
 - **Owner-only**: "my profile"/"my tasks" - scoped to the JWT's own id.

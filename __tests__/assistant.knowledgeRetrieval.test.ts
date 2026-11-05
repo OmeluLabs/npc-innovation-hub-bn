@@ -1,6 +1,6 @@
 // Real-DB coverage for the assistant's knowledge retrieval / RBAC gating.
 // Deliberately NOT model-mocked (unlike most other __tests__ files) - this
-// module exercises Project/Event/Blog/Member/HeroFeaturedMember/Alumnus/
+// module exercises Project/Event/Blog/Member/HeroFeaturedMember/
 // Resource/Task/User together through real Sequelize associations
 // (User.hasOne(Member), HeroFeaturedMember.belongsTo(Member), etc.), and
 // mocking one association target while leaving another real is exactly
@@ -14,7 +14,6 @@ import Project from '../src/models/project.model';
 import Event from '../src/models/event.model';
 import Blog from '../src/models/blog.model';
 import HeroFeaturedMember from '../src/models/heroFeaturedMember.model';
-import Alumnus from '../src/models/alumnus.model';
 import Resource, { ResourceCategory, ResourceType, ResourceDifficulty } from '../src/models/resource.model';
 import Task from '../src/models/task.model';
 import { retrieveKnowledge, classifyIntent } from '../src/services/assistant/knowledgeRetrieval.service';
@@ -136,12 +135,6 @@ describe('retrieveKnowledge - real DB, RBAC-gated', () => {
     } as any);
     unpublishedBlogId = unpublished.get('id');
 
-    await Alumnus.create({
-      fullName: 'Grace Graduate',
-      role: 'Alumna',
-      createdBy: userA.id,
-    } as any);
-
     await Resource.create({
       userId: userA.id,
       title: 'Internal Backend Guide',
@@ -160,7 +153,6 @@ describe('retrieveKnowledge - real DB, RBAC-gated', () => {
     await Resource.destroy({ where: { userId: [userA.id, userB.id] } });
     await Blog.destroy({ where: { authorId: [userA.id, userB.id] } });
     await Event.destroy({ where: { createdBy: userA.id } });
-    await Alumnus.destroy({ where: { createdBy: userA.id } });
     await Project.destroy({ where: { userId: [userA.id, userB.id] } });
     await HeroFeaturedMember.destroy({ where: {} });
     await Member.destroy({ where: { userId: [userA.id, userB.id] } });

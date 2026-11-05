@@ -36,27 +36,6 @@ export const MEMBER_SPECIALIZATIONS = [
 
 export const EDUCATION_STATUSES = ['Currently Enrolled', 'Graduated', 'On Leave', 'Other'] as const
 
-const alumniStatusUpdateSchema = Joi.object({
-  isAlumni: Joi.boolean().required().messages({
-    'any.required': 'isAlumni is required',
-    'boolean.base': 'isAlumni must be true or false',
-  }),
-})
-
-export const validateAlumniStatusUpdate = (req: Request, res: Response, next: NextFunction): void => {
-  const { error, value } = alumniStatusUpdateSchema.validate(req.body || {}, { abortEarly: false })
-  if (error) {
-    res.status(400).json({
-      status: 'fail',
-      message: error.details.map((detail) => detail.message).join(', '),
-    })
-    return
-  }
-
-  req.body.isAlumni = value.isAlumni
-  next()
-}
-
 const leadershipUpdateSchema = Joi.object({
   leadershipTier: Joi.string().valid('Co-Founder', 'Leader', 'Member').required().messages({
     'any.only': 'leadershipTier must be Co-Founder, Leader or Member',
